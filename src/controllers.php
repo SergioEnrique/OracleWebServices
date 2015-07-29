@@ -8,27 +8,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Zend\Soap\Client;
 
-class StupidWrapperForOracleServer extends SoapClient {
-    protected function callCurl($url, $data, $action) {
-        $handle   = curl_init();
-        curl_setopt($handle, CURLOPT_URL, $url);
-        curl_setopt($handle, CURLOPT_HTTPHEADER, Array("Content-Type: text/xml", 'SOAPAction: "' . $action . '"'));
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($handle, CURLOPT_SSLVERSION, 2);
-        $response = curl_exec($handle);
-        if (empty($response)) {
-            throw new SoapFault('CURL error: '.curl_error($handle),curl_errno($handle));
-        }
-        curl_close($handle);
-        return $response;
-    }
-
-    public function __doRequest($request,$location,$action,$version,$one_way = 0) {
-        return $this->callCurl($location, $request, $action);
-    }
-}
-
 $app->before(function () use ($app) {
     $app['base_url'] = $app['request_stack']->getCurrentRequest()->getScheme().'://'.$app['request_stack']->getCurrentRequest()->getHttpHost().$app['request_stack']->getCurrentRequest()->getBaseUrl();
     ini_set("soap.wsdl_cache_enabled", "0");
@@ -37,21 +16,14 @@ $app->before(function () use ($app) {
 
 $app->get('/client', function () use ($app) {
 
-    $oracleWebServiceWSDL = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
-    //$oracleWebServiceWSDL = "https://webtjener09.kred.no/TestWebservice/OppdragServiceSoapHttpPort?WSDL";
-
-//    file_put_contents(dirname(__FILE__) .'/Server.wsdl', get_wsdl()); //get_wsdl uses the same wrapper as above
-//    $client = new StupidWrapperForOracleServer(dirname(__FILE__) .'/Server.wsdl',array('trace'=>1,'cache_wsdl'=>0));
-
-    $action = '';
-    $data = '';
+    $url = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_URL, $oracleWebServiceWSDL);
-    curl_setopt($ch, CURLOPT_REFERER, $oracleWebServiceWSDL);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_REFERER, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $result = curl_exec($ch);
 
@@ -60,38 +32,10 @@ $app->get('/client', function () use ($app) {
     }
     curl_close($ch);
 
-    return new Response($result, 200, array(
-        "Content-Type" => "application/xml"
-    ));
+    file_put_contents(dirname(__FILE__).'/../web/Server.wsdl', $result);
 
+    $client = new SoapClient(dirname(__FILE__).'/../web/Server.wsdl');
 
-    $handle = curl_init();
-        curl_setopt($handle, CURLOPT_URL, $oracleWebServiceWSDL);
-        curl_setopt($handle, CURLOPT_HTTPHEADER, Array("Content-Type: text/xml", 'SOAPAction: "' . $action . '"'));
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($handle, CURLOPT_SSLVERSION, 3);
-        $response = curl_exec($handle);
-        if (empty($response)) {
-            return new Response(new SoapFault('CURL error: '.curl_error($handle),curl_errno($handle)));
-        }
-        curl_close($handle);
-
-    return new Response($response);
-
-
-
-
-
-    $options = array(
-        'trace' => 1,
-        'use' => SOAP_LITERAL,
-        'style' => SOAP_DOCUMENT,
-    );
-
-    $client = new SoapClient($oracleWebServiceWSDL, $options);
-
-    $params = new \SoapVar("<Echo><Acquirer><Id>MyId</Id><UserId>MyUserId</UserId><Password>MyPassword</Password></Acquirer></Echo>", XSD_ANYXML);
     $result = $client->MethodNameIsIgnored($params);
 
     return new Response($result, 200, array(
