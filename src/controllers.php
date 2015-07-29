@@ -8,26 +8,28 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Zend\Soap\Client;
 
+$app->register(new Silex\Provider\SerializerServiceProvider());
+
 $app->before(function () use ($app) {
     $app['base_url'] = $app['request_stack']->getCurrentRequest()->getScheme().'://'.$app['request_stack']->getCurrentRequest()->getHttpHost().$app['request_stack']->getCurrentRequest()->getBaseUrl();
     ini_set("soap.wsdl_cache_enabled", "0");
-    $app['serializer'] = Zend\Serializer\Serializer::factory('phpserialize');
+    $app['zendSerializer'] = Zend\Serializer\Serializer::factory('phpserialize');
 });
 
-$app->get('/client', function () use ($app) {
+$app->get('/client/services/{service}/params/{params}/', function ($service, $params) use ($app) {
 
-    $url = "http://www.webservicex.com/globalweather.asmx?WSDL";
+    $params = json_decode($params);
+
+    $urls = array(
+        'SalesPartyService' => "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL",
+        'globalweather' => "http://www.webservicex.com/globalweather.asmx?WSDL",
+    );
 
     $options = array(
 
     );
 
-    $client = new Client($url, $options);
-
-    $params = array(
-        'CountryName' => 'Mexico',
-        'CityName' => 'Puebla'
-    );
+    $client = new Client($urls[$service], $options);
 
     $clima = $client->GetWeather($params)->GetWeatherResult;
 
