@@ -16,11 +16,7 @@ $app->get('/client', function () use ($app) {
     $oracleWebServiceWSDL = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
     //$oracleWebServiceWSDL = "http://www.webservicex.com/globalweather.asmx?WSDL";
 
-    $options = array(
-                
-            );
-
-    $client = new Zend\Soap\Client($oracleWebServiceWSDL, $options);
+    $client = new Zend\Soap\Client($oracleWebServiceWSDL);
     $personParty = $client->createPersonPartyAsyncResponse();
 
     return new Response($app['serializer']->serialize($personParty), 200, array(
