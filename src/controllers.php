@@ -46,13 +46,31 @@ $app->get('/client', function () use ($app) {
     $action = '';
     $data = '';
 
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_HEADER, false);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_URL, $oracleWebServiceWSDL);
+    curl_setopt($ch, CURLOPT_REFERER, $oracleWebServiceWSDL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $result = curl_exec($ch);
+
+    if (empty($result)) {
+        return new Response(new SoapFault('CURL error: '.curl_error($ch),curl_errno($ch)));
+    }
+    curl_close($ch);
+
+    return new Response($result, 200, array(
+        "Content-Type" => "application/xml"
+    ));
+
 
     $handle = curl_init();
         curl_setopt($handle, CURLOPT_URL, $oracleWebServiceWSDL);
         curl_setopt($handle, CURLOPT_HTTPHEADER, Array("Content-Type: text/xml", 'SOAPAction: "' . $action . '"'));
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($handle, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+        curl_setopt($handle, CURLOPT_SSLVERSION, 3);
         $response = curl_exec($handle);
         if (empty($response)) {
             return new Response(new SoapFault('CURL error: '.curl_error($handle),curl_errno($handle)));
