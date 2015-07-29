@@ -6,40 +6,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class SoapService
-{
-    /**
-     * Returns a hello world
-     *
-     * @param string $name
-     * @return string the hello world
-     */
-    public function hello($name)
-    {
-        return "Hello $name!";
-    }
-}
-
 $app->before(function () use ($app) {
     $app['base_url'] = $app['request_stack']->getCurrentRequest()->getScheme().'://'.$app['request_stack']->getCurrentRequest()->getHttpHost().$app['request_stack']->getCurrentRequest()->getBaseUrl();
-    //ini_set("soap.wsdl_cache_enabled", "0");
+    ini_set("soap.wsdl_cache_enabled", "0");
     $app['serializer'] = Zend\Serializer\Serializer::factory('phpserialize');
-});
-
-$app->match('/', function () use ($app) {
-    $server = new Zend\Soap\Server($app['base_url'].'/wsdl');
-    $server->setObject(new SoapService());
-    $server->setReturnResponse(true);
-    $response = $server->handle($app['request_stack']->getCurrentRequest()->getContent());
-    return $response;
-});
-
-$app->get('/wsdl', function () use ($app) {
-    $autodiscover = new Zend\Soap\AutoDiscover();
-    $autodiscover->setClass('SoapService');
-    $autodiscover->setUri($app['base_url']);
-    $wsdl = $autodiscover->toXml();
-    return new Response($wsdl, 200, array('Content-Type' => 'application/xml'));
 });
 
 $app->get('/client', function () use ($app) {
@@ -55,11 +25,13 @@ $app->get('/client', function () use ($app) {
     return new Response($clima->GetWeatherResult, 200, array(
         "Content-Type" => "application/xml"
     ));
+    /*
     return new Response($app['serializer']->serialize($clima->GetWeatherResult), 200, array(
         "Content-Type" => "application/json"
     ));
 
-    //return $client->createPersonPartyAsyncResponse();
+    return $client->createPersonPartyAsyncResponse();
+    */
 });
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
