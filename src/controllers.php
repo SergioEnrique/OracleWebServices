@@ -34,9 +34,9 @@ $app->get('/client', function () use ($app) {
 
     file_put_contents(dirname(__FILE__).'/../web/Server.wsdl', $result);
 
-    $client = new SoapClient(dirname(__FILE__).'/../web/Server.wsdl');
+    $client = new Client(dirname(__FILE__).'/../web/Server.wsdl');
 
-    $result = $client->MethodNameIsIgnored($params);
+    $result = $client->MethodNameIsIgnored();
 
     return new Response($result, 200, array(
         "Content-Type" => "application/xml"
