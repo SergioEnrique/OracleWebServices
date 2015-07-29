@@ -16,7 +16,7 @@ $app->before(function () use ($app) {
     $app['zendSerializer'] = Zend\Serializer\Serializer::factory('phpserialize');
 });
 
-$app->get('/client/services/{service}/params/{params}/', function ($service, $params) use ($app) {
+$app->get('/client/services/{service}/operations/{operation}/params/{params}/', function ($service, $operation, $params) use ($app) {
 
     $params = json_decode($params);
 
@@ -31,7 +31,15 @@ $app->get('/client/services/{service}/params/{params}/', function ($service, $pa
 
     $client = new Client($urls[$service], $options);
 
-    $clima = $client->GetWeather($params)->GetWeatherResult;
+    switch ($operation) {
+        case 'GetWeather':
+            $clima = $client->GetWeather($params)->GetWeatherResult;
+            break;
+        
+        default:
+            # code...
+            break;
+    }
 
     return new Response($clima, 200, array(
         "Content-Type" => "application/xml"
