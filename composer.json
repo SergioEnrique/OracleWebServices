@@ -5,6 +5,7 @@
     "type": "project",
     "require": {
         "php": ">=5.5.9",
+        "ext-soap": "*",
         "silex/silex": "~2.0@dev",
         "silex/web-profiler": "~2.0@dev",
         "symfony/browser-kit": "~2.6",
