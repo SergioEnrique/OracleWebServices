@@ -43,6 +43,28 @@ $app->get('/client', function () use ($app) {
 //    file_put_contents(dirname(__FILE__) .'/Server.wsdl', get_wsdl()); //get_wsdl uses the same wrapper as above
 //    $client = new StupidWrapperForOracleServer(dirname(__FILE__) .'/Server.wsdl',array('trace'=>1,'cache_wsdl'=>0));
 
+    $action = '';
+    $data = '';
+
+
+    $handle = curl_init();
+        curl_setopt($handle, CURLOPT_URL, $oracleWebServiceWSDL);
+        curl_setopt($handle, CURLOPT_HTTPHEADER, Array("Content-Type: text/xml", 'SOAPAction: "' . $action . '"'));
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($handle, CURLOPT_SSLVERSION, 2);
+        $response = curl_exec($handle);
+        if (empty($response)) {
+            return new Response(new SoapFault('CURL error: '.curl_error($handle),curl_errno($handle)));
+        }
+        curl_close($handle);
+
+    return new Response($response);
+
+
+
+
+
     $options = array(
         'trace' => 1,
         'use' => SOAP_LITERAL,
