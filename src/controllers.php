@@ -40,11 +40,25 @@ $app->get('/client', function () use ($app) {
     $oracleWebServiceWSDL = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
     //$oracleWebServiceWSDL = "https://webtjener09.kred.no/TestWebservice/OppdragServiceSoapHttpPort?WSDL";
 
-    file_put_contents(dirname(__FILE__) .'/Server.wsdl', get_wsdl()); //get_wsdl uses the same wrapper as above
-    $client = new StupidWrapperForOracleServer(dirname(__FILE__) .'/Server.wsdl',array('trace'=>1,'cache_wsdl'=>0));
+//    file_put_contents(dirname(__FILE__) .'/Server.wsdl', get_wsdl()); //get_wsdl uses the same wrapper as above
+//    $client = new StupidWrapperForOracleServer(dirname(__FILE__) .'/Server.wsdl',array('trace'=>1,'cache_wsdl'=>0));
 
-    //$client = new StupidWrapperForOracleServer($oracleWebServiceWSDL);
-    $personParty = $client->getSalesAccount();
+    $options = array(
+        'trace' => 1,
+        'use' => SOAP_LITERAL,
+        'style' => SOAP_DOCUMENT,
+    );
+
+    $client = new SoapClient($oracleWebServiceWSDL, $options);
+
+    $params = new \SoapVar("<Echo><Acquirer><Id>MyId</Id><UserId>MyUserId</UserId><Password>MyPassword</Password></Acquirer></Echo>", XSD_ANYXML);
+    $result = $client->MethodNameIsIgnored($params);
+
+    return new Response($result, 200, array(
+        "Content-Type" => "application/xml"
+    ));
+
+    //$personParty = $client->getSalesAccount();
 
     return new Response($app['serializer']->serialize($personParty), 200, array(
         "Content-Type" => "application/json"
