@@ -16,66 +16,24 @@ $app->before(function () use ($app) {
 
 $app->get('/client', function () use ($app) {
 
-    $url = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-    curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_REFERER, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    $result = curl_exec($ch);
-
-    if (empty($result)) {
-        return new Response(new SoapFault('CURL error: '.curl_error($ch),curl_errno($ch)));
-    }
-    curl_close($ch);
-
-    file_put_contents(dirname(__FILE__).'/../web/Server.wsdl', $result);
-
-    $client = new SoapClient(dirname(__FILE__).'/../web/Server.wsdl');
-
-    $result = $client->MethodNameIsIgnored($params);
-
-    return new Response($result, 200, array(
-        "Content-Type" => "application/xml"
-    ));
-
-    //$personParty = $client->getSalesAccount();
-
-    return new Response($app['serializer']->serialize($personParty), 200, array(
-        "Content-Type" => "application/json"
-    ));
-
-    /*
+    $url = "http://www.webservicex.com/globalweather.asmx?WSDL";
 
     $options = array(
-                //'trace' => 1,
-                //'location' => 'https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService',
-            );
 
-    $client = new StupidWrapperForOracleServer($oracleWebServiceWSDL, $options);
-    $client->setHttpLogin('prueba');
-    $client->setHttpPassword('aN1m4La');
+    );
 
-    $personParty = $client->getSalesAccount();
+    $client = new Client($url, $options);
 
-    return new Response($app['serializer']->serialize($personParty), 200, array(
-        "Content-Type" => "application/json"
-    ));
+    $params = array(
+        'CountryName' => 'Mexico',
+        'CityName' => 'Puebla'
+    );
 
-    /*
-    return new Response($app['serializer']->serialize($clima->GetWeatherResult), 200, array(
-        "Content-Type" => "application/json"
-    ));
+    $clima = $client->GetWeather($params)->GetWeatherResult;
 
-    return new Response($clima->GetWeatherResult, 200, array(
+    return new Response($clima, 200, array(
         "Content-Type" => "application/xml"
     ));
-
-    return $client->createPersonPartyAsyncResponse();
-    */
 });
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
