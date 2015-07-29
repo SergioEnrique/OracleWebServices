@@ -18,23 +18,14 @@ $app->get('/client', function () use ($app) {
 
     $url = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-    curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_REFERER, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    $result = curl_exec($ch);
+    $options = array(
+        'login' => 'jgonzalez',
+        'password' => 'Medix2015',
+        'local_cert' => dirname(__FILE__).'/../web/certificate.crt',
+    );
 
-    if (empty($result)) {
-        return new Response(new SoapFault('CURL error: '.curl_error($ch),curl_errno($ch)));
-    }
-    curl_close($ch);
+    $client = new Client($url, $options);
 
-    file_put_contents(dirname(__FILE__).'/../web/Server.wsdl', $result);
-
-    $client = new Client(dirname(__FILE__).'/../web/Server.wsdl');
 
     $result = $client->MethodNameIsIgnored();
 
