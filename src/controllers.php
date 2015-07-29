@@ -52,7 +52,7 @@ $app->get('/client', function () use ($app) {
         curl_setopt($handle, CURLOPT_HTTPHEADER, Array("Content-Type: text/xml", 'SOAPAction: "' . $action . '"'));
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($handle, CURLOPT_SSLVERSION, 2);
+        curl_setopt($handle, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         $response = curl_exec($handle);
         if (empty($response)) {
             return new Response(new SoapFault('CURL error: '.curl_error($handle),curl_errno($handle)));
