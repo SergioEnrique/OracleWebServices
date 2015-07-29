@@ -13,21 +13,27 @@ $app->before(function () use ($app) {
 });
 
 $app->get('/client', function () use ($app) {
-    //$oracleWebServiceWSDL = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
-    $oracleWebServiceWSDL = "http://www.webservicex.com/globalweather.asmx?WSDL";
+    $oracleWebServiceWSDL = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
+    //$oracleWebServiceWSDL = "http://www.webservicex.com/globalweather.asmx?WSDL";
 
-    $options = array('CountryName' => 'Mexico', 'CityName' => 'Puebla');
+    $options = array(
+                
+            );
 
-    $client = new Zend\Soap\Client($oracleWebServiceWSDL);
-    $clima = $client->GetWeather($options);
+    $client = new Zend\Soap\Client($oracleWebServiceWSDL, $options);
+    $personParty = $client->createPersonPartyAsyncResponse();
 
-    //return new Response(get_class_vars($clima));
-    return new Response($clima->GetWeatherResult, 200, array(
-        "Content-Type" => "application/xml"
+    return new Response($app['serializer']->serialize($personParty), 200, array(
+        "Content-Type" => "application/json"
     ));
+
     /*
     return new Response($app['serializer']->serialize($clima->GetWeatherResult), 200, array(
         "Content-Type" => "application/json"
+    ));
+
+    return new Response($clima->GetWeatherResult, 200, array(
+        "Content-Type" => "application/xml"
     ));
 
     return $client->createPersonPartyAsyncResponse();
