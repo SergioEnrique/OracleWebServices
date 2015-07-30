@@ -33,7 +33,7 @@ $app->get('/client/services/{service}/operations/{operation}/params/{params}/', 
 
     switch ($operation) {
         case 'GetWeather':
-            $clima = $client->GetWeather($params)->GetWeatherResult;
+            $response = $client->GetWeather($params)->GetWeatherResult;
             break;
         
         default:
@@ -41,7 +41,7 @@ $app->get('/client/services/{service}/operations/{operation}/params/{params}/', 
             break;
     }
 
-    return new Response($clima, 200, array(
+    return new Response($response, 200, array(
         "Content-Type" => "application/xml"
     ));
 });
