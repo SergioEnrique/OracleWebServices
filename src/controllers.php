@@ -56,26 +56,24 @@ $app->get('/client', function () use ($app) {
     </soap:Body>
 </soap:Envelope>';
 
-    /*
-    $response = file_get_contents($url);
-    return new Response($response, 200, array(
-        "Content-Type" => "application/xml"
-    ));
-    */
+    $data = '';    
 
-    $opts = array('http' =>
-                array(
-                    'method'  => 'GET',
-                    'header'  => 'Content-type: application/xml',
-                    'content' => $request
-                    )
-                );
+    $opts = array (
+        'http' => array (
+            'method' => 'GET',
+            'header'=> "Content-type: text/xml\r\n"
+                . "Content-Length: " . strlen($data) . "\r\n",
+            'content' => $data
+            )
+        );
 
     $context  = stream_context_create($opts);
 
-    $result = file_get_contents($url, false, $context);
+    $response = file_get_contents($url, false, $context);
 
-    return new Response($result);
+    return new Response($response, 200, array(
+        "Content-Type" => "text/xml"
+    ));
 
 /*
     $options = array(
