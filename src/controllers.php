@@ -16,83 +16,36 @@ $app->before(function () use ($app) {
     $app['zendSerializer'] = Zend\Serializer\Serializer::factory('phpserialize');
 });
 
+$app->get('/client/services/{service}/operations/{operation}/params/{params}/', function ($service, $operation, $params) use ($app) {
 
-// Comienza la app
-$app->get('/client', function () use ($app) {
-    $url = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
+    $params = json_decode($params);
 
-    $request = '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Header>
-        <wsse:Security soap:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
-            <wsse:UsernameToken>
-                <wsse:Username>jgonzalez</wsse:Username>
-                <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">Medix2015</wsse:Password>
-            </wsse:UsernameToken>
-        </wsse:Security>
-    </soap:Header>
-    <soap:Body xmlns:ns1="http://xmlns.oracle.com/apps/cdm/foundation/parties/personService/applicationModule/types/">
-        <ns1:createPerson>
-            <ns1:personParty xmlns:ns2="http://xmlns.oracle.com/apps/cdm/foundation/parties/personService/">
-                <ns2:CreatedByModule>AMS</ns2:CreatedByModule>
-                <ns2:PersonProfile>
-                    <ns2:PersonFirstName>Andy</ns2:PersonFirstName>
-                    <ns2:PersonMiddleName>Randy</ns2:PersonMiddleName>
-                    <ns2:PersonLastName>Wilson</ns2:PersonLastName>
-                    <ns2:CreatedByModule>AMS</ns2:CreatedByModule>
-                </ns2:PersonProfile>
-                <ns2:PartyUsageAssignment xmlns:ns3="http://xmlns.oracle.com/apps/cdm/foundation/parties/partyService/">
-                    <ns3:PartyUsageCode>CUSTOMER</ns3:PartyUsageCode>
-                    <ns3:CreatedByModule>AMS</ns3:CreatedByModule>
-                    <par:OwnerTableId>?</par:OwnerTableId>
-                </ns2:PartyUsageAssignment>
-                <ns2:AdditionalPartyId xmlns:ns4="http://xmlns.oracle.com/apps/cdm/foundation/parties/partyService/">
-                    <ns4:PartyIdentifierType>ID_NUMBER</ns4:PartyIdentifierType>
-                    <ns4:PartyIdentifierValue>ID12345678</ns4:PartyIdentifierValue>
-                    <ns4:CreatedByModule>AMS</ns4:CreatedByModule>
-                    <ns4:IssuingAuthorityName>APRTO</ns4:IssuingAuthorityName>
-                </ns2:AdditionalPartyId>
-            </ns1:personParty>
-        </ns1:createPerson>
-    </soap:Body>
-</soap:Envelope>';
-
-    /*
-    $response = file_get_contents($url);
-    return new Response($response, 200, array(
-        "Content-Type" => "application/xml"
-    ));
-    */
-
-    $opts = array('http' =>
-                array(
-                    'method'  => 'GET',
-                    'header'  => 'Content-type: application/xml',
-                    'content' => $request
-                    )
-                );
-
-    $context  = stream_context_create($opts);
-
-    $result = file_get_contents($url, false, $context);
-
-    return new Response($result);
-
-/*
-    $options = array(
-        'login' => 'jgonzalez',
-        'password' => 'Medix2015',
+    $urls = array(
+        'SalesPartyService' => "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL",
+        'globalweather' => "http://www.webservicex.com/globalweather.asmx?WSDL",
     );
 
-    $client = new Client($url, $options);
+    $options = array(
 
-    $client->setParameterPost('request', $request);
-    $response = $client->request('POST');
+    );
 
-    return new Response($response);
-*/
+    $client = new Client($urls[$service], $options);
+
+    switch ($operation) {
+        case 'GetWeather':
+            $clima = $client->GetWeather($params)->GetWeatherResult;
+            break;
+        
+        default:
+            # code...
+            break;
+    }
+
+    return new Response($clima, 200, array(
+        "Content-Type" => "application/xml"
+    ));
 });
 
-// Errores
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
     if ($app['debug']) {
         return;
