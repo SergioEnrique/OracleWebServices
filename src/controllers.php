@@ -28,9 +28,17 @@ $app->get('/client/services/{service}/operations/{operation}/params/{params}/', 
         "personParty" => array(
             "CreatedByModule" => "AMS",
             "PersonProfile" => array(
-                "PersonFirstName" => "Sergio",
-                "PersonMiddleName" => "Enrique",
-                "PersonLastName" => "Vargas",
+                "PersonFirstName" => "",
+                "PersonMiddleName" => "",
+                "PersonLastName" => "",
+                "PersonSecondLastName" => "",
+                "PersonTitle" => "",
+                "PersonAcademicTitle" => "",
+                "Country" => "",
+                "City" => "",
+                "State" => "",
+                "EmailAddress" => "",
+                "PrimaryPhoneNumber" => "",
                 "CreatedByModule" => "AMS"
             ),
             "PartyUsageAssignment" => array(
