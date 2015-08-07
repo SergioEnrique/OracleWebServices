@@ -16,81 +16,79 @@ $app->before(function () use ($app) {
     $app['zendSerializer'] = Zend\Serializer\Serializer::factory('phpserialize');
 });
 
+$app->get('/client/services/{service}/operations/{operation}/params/{params}/', function ($service, $operation, $params) use ($app) {
 
-// Comienza la app
-$app->get('/client', function () use ($app) {
-    $url = "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL";
+    $username = "jgonzalez"; // Producción
+    //$username = "RORTIZ"; // Desarrollo
+    $password = "Medix2015";
 
-    $request = '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Header>
-        <wsse:Security soap:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
-            <wsse:UsernameToken>
-                <wsse:Username>jgonzalez</wsse:Username>
-                <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">Medix2015</wsse:Password>
-            </wsse:UsernameToken>
-        </wsse:Security>
-    </soap:Header>
-    <soap:Body xmlns:ns1="http://xmlns.oracle.com/apps/cdm/foundation/parties/personService/applicationModule/types/">
-        <ns1:createPerson>
-            <ns1:personParty xmlns:ns2="http://xmlns.oracle.com/apps/cdm/foundation/parties/personService/">
-                <ns2:CreatedByModule>AMS</ns2:CreatedByModule>
-                <ns2:PersonProfile>
-                    <ns2:PersonFirstName>Andy</ns2:PersonFirstName>
-                    <ns2:PersonMiddleName>Randy</ns2:PersonMiddleName>
-                    <ns2:PersonLastName>Wilson</ns2:PersonLastName>
-                    <ns2:CreatedByModule>AMS</ns2:CreatedByModule>
-                </ns2:PersonProfile>
-                <ns2:PartyUsageAssignment xmlns:ns3="http://xmlns.oracle.com/apps/cdm/foundation/parties/partyService/">
-                    <ns3:PartyUsageCode>CUSTOMER</ns3:PartyUsageCode>
-                    <ns3:CreatedByModule>AMS</ns3:CreatedByModule>
-                    <par:OwnerTableId>?</par:OwnerTableId>
-                </ns2:PartyUsageAssignment>
-                <ns2:AdditionalPartyId xmlns:ns4="http://xmlns.oracle.com/apps/cdm/foundation/parties/partyService/">
-                    <ns4:PartyIdentifierType>ID_NUMBER</ns4:PartyIdentifierType>
-                    <ns4:PartyIdentifierValue>ID12345678</ns4:PartyIdentifierValue>
-                    <ns4:CreatedByModule>AMS</ns4:CreatedByModule>
-                    <ns4:IssuingAuthorityName>APRTO</ns4:IssuingAuthorityName>
-                </ns2:AdditionalPartyId>
-            </ns1:personParty>
-        </ns1:createPerson>
-    </soap:Body>
-</soap:Envelope>';
+    $params = json_decode($params);
 
-    $data = '';    
-
-    $opts = array (
-        'http' => array (
-            'method' => 'GET',
-            'header'=> "Content-type: text/xml\r\n"
-                . "Content-Length: " . strlen($data) . "\r\n",
-            'content' => $data
+    $params = array(
+        "personParty" => array(
+            "CreatedByModule" => "AMS",
+            "PersonProfile" => array(
+                "PersonFirstName" => "Sergio",
+                "PersonMiddleName" => "Enrique",
+                "PersonLastName" => "Vargas",
+                "CreatedByModule" => "AMS"
+            ),
+            "PartyUsageAssignment" => array(
+                "PartyUsageCode" => "CUSTOMER",
+                "CreatedByModule" => "AMS",
             )
-        );
-
-    $context  = stream_context_create($opts);
-
-    $response = file_get_contents($url, false, $context);
-
-    return new Response($response, 200, array(
-        "Content-Type" => "text/xml"
-    ));
-
-/*
-    $options = array(
-        'login' => 'jgonzalez',
-        'password' => 'Medix2015',
+        )
     );
 
-    $client = new Client($url, $options);
+    $urls = array(
+        'salespartyservice' => "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL",
+        'contactservice' => 'https://cbfb-test.crm.us2.oraclecloud.com/crmCommonSalesParties/ContactService?WSDL',
+        'globalweather' => "http://www.webservicex.com/globalweather.asmx?WSDL",
+    );
 
-    $client->setParameterPost('request', $request);
-    $response = $client->request('POST');
+    $options = array(
+        "login" => $username,
+        "password" => $password,
+        "soap_version" => SOAP_1_1,
+        "streamContext" => stream_context_create(
+        array(
+          'http' => array(
+            'protocol_version' => '1.0'
+          )
+        )
+        ),
+        # WSDL_CACHE_NONE | WSDL_CACHE_MEMORY : Guarda el resulta en cache por default
+        "cacheWsdl" => WSDL_CACHE_NONE
+    );
 
-    return new Response($response);
-*/
+    $client = new Client($urls[$service], $options);
+
+    switch ($operation) {
+        case 'GetWeather':
+            $response = $client->GetWeather($params);
+            break;
+        case 'createContact':
+            $response = $client->createContact($params);
+            break;
+        case 'createPersonParty':
+            $response = $client->createPersonParty($params);
+            break;
+        default:
+            $response = array("Operacion no existente en el controlador");
+            break;
+    }
+
+    return new Response($app['zendSerializer']->serialize($response), 200, array(
+        "Content-Type" => "application/json"
+    ));
+
+    /*
+    return new Response($response, 200, array(
+        "Content-Type" => "application/xml"
+    ));
+    */
 });
 
-// Errores
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
     if ($app['debug']) {
         return;
