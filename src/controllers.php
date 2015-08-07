@@ -16,37 +16,14 @@ $app->before(function () use ($app) {
     $app['zendSerializer'] = Zend\Serializer\Serializer::factory('phpserialize');
 });
 
-$app->get('/client/services/{service}/operations/{operation}/params/{params}/', function ($service, $operation, $params) use ($app) {
+$app->get('/client/services/{service}/operations/{operation}/', function (Request $request, $service, $operation) use ($app) {
 
     $username = "jgonzalez"; // Producción
     //$username = "RORTIZ"; // Desarrollo
     $password = "Medix2015";
 
-    $params = json_decode($params);
-
-    $params = array(
-        "personParty" => array(
-            "CreatedByModule" => "AMS",
-            "PersonProfile" => array(
-                "PersonFirstName" => "",
-                "PersonMiddleName" => "",
-                "PersonLastName" => "",
-                "PersonSecondLastName" => "",
-                "PersonTitle" => "",
-                "PersonAcademicTitle" => "",
-                "Country" => "",
-                "City" => "",
-                "State" => "",
-                "EmailAddress" => "",
-                "PrimaryPhoneNumber" => "",
-                "CreatedByModule" => "AMS"
-            ),
-            "PartyUsageAssignment" => array(
-                "PartyUsageCode" => "CUSTOMER",
-                "CreatedByModule" => "AMS",
-            )
-        )
-    );
+    // Convertir la informacion (content del archivo) a un array para mandarlo al cliente soap
+    $params = json_decode($request->getContent(), true);
 
     $urls = array(
         'salespartyservice' => "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL",
@@ -90,11 +67,6 @@ $app->get('/client/services/{service}/operations/{operation}/params/{params}/', 
         "Content-Type" => "application/json"
     ));
 
-    /*
-    return new Response($response, 200, array(
-        "Content-Type" => "application/xml"
-    ));
-    */
 });
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
