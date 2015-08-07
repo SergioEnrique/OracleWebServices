@@ -18,32 +18,75 @@ $app->before(function () use ($app) {
 
 $app->get('/client/services/{service}/operations/{operation}/params/{params}/', function ($service, $operation, $params) use ($app) {
 
+    $username = "jgonzalez"; // Producción
+    //$username = "RORTIZ"; // Desarrollo
+    $password = "Medix2015";
+
     $params = json_decode($params);
 
+    $params = array(
+        "personParty" => array(
+            "CreatedByModule" => "AMS",
+            "PersonProfile" => array(
+                "PersonFirstName" => "Sergio",
+                "PersonMiddleName" => "Enrique",
+                "PersonLastName" => "Vargas",
+                "CreatedByModule" => "AMS"
+            ),
+            "PartyUsageAssignment" => array(
+                "PartyUsageCode" => "CUSTOMER",
+                "CreatedByModule" => "AMS",
+            )
+        )
+    );
+
     $urls = array(
-        'SalesPartyService' => "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL",
+        'salespartyservice' => "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL",
+        'contactservice' => 'https://cbfb-test.crm.us2.oraclecloud.com/crmCommonSalesParties/ContactService?WSDL',
         'globalweather' => "http://www.webservicex.com/globalweather.asmx?WSDL",
     );
 
     $options = array(
-
+        "login" => $username,
+        "password" => $password,
+        "soap_version" => SOAP_1_1,
+        "streamContext" => stream_context_create(
+        array(
+          'http' => array(
+            'protocol_version' => '1.0'
+          )
+        )
+        ),
+        # WSDL_CACHE_NONE | WSDL_CACHE_MEMORY : Guarda el resulta en cache por default
+        "cacheWsdl" => WSDL_CACHE_NONE
     );
 
     $client = new Client($urls[$service], $options);
 
     switch ($operation) {
         case 'GetWeather':
-            $response = $client->GetWeather($params)->GetWeatherResult;
+            $response = $client->GetWeather($params);
             break;
-        
+        case 'createContact':
+            $response = $client->createContact($params);
+            break;
+        case 'createPersonParty':
+            $response = $client->createPersonParty($params);
+            break;
         default:
-            # code...
+            $response = array("Operacion no existente en el controlador");
             break;
     }
 
+    return new Response($app['zendSerializer']->serialize($response), 200, array(
+        "Content-Type" => "application/json"
+    ));
+
+    /*
     return new Response($response, 200, array(
         "Content-Type" => "application/xml"
     ));
+    */
 });
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
