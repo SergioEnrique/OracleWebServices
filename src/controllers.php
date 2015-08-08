@@ -18,7 +18,13 @@ $app->before(function () use ($app) {
 
 $app->get('/client/services/{service}/operations/{operation}/', function (Request $request, $service, $operation) use ($app) {
 
-    $username = "RORTIZ";
+    if ($service == 'salespartyservice') {
+        $username = "jgonzalez";
+    }
+    else{
+        $username = "RORTIZ";
+    }
+    
     $password = "Medix2015";
 
     // Convertir la informacion (content del archivo) a un array para mandarlo al cliente soap
