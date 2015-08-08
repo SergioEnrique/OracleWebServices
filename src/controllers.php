@@ -18,8 +18,7 @@ $app->before(function () use ($app) {
 
 $app->get('/client/services/{service}/operations/{operation}/', function (Request $request, $service, $operation) use ($app) {
 
-    $username = "RORTIZ"; // Producción
-    //$username = "RORTIZ"; // Desarrollo
+    $username = "RORTIZ";
     $password = "Medix2015";
 
     // Convertir la informacion (content del archivo) a un array para mandarlo al cliente soap
@@ -27,7 +26,7 @@ $app->get('/client/services/{service}/operations/{operation}/', function (Reques
 
     $urls = array(
         'salespartyservice' => "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL",
-        'contactservice' => 'https://cbfb-test.crm.us2.oraclecloud.com/crmCommonSalesParties/ContactService?WSDL',
+        'contactservice' => "https://cbfa.crm.us2.oraclecloud.com/crmCommonSalesParties/ContactService?WSDL",
         'globalweather' => "http://www.webservicex.com/globalweather.asmx?WSDL",
     );
 
