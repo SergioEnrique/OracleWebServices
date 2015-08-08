@@ -38,5 +38,28 @@ $opts = array('http' =>
 
 $context  = stream_context_create($opts);
 
-$url = "https://oraclewebservice.herokuapp.com/web/index.php/client/services/salespartyservice/operations/createPersonParty/";
+$url = "https://oraclewebservice.herokuapp.com/web/index.php/client/services/salespartyservice/environments/dev/operations/createPersonParty/";
 $result = file_get_contents($url, false, $context);
+
+
+/* Servicio que agrega un contacto en vez de un cliente:
+
+$params = array(
+    "contact" => array( 
+        "FirstName" => ff_getSubmit('nombre'),
+        "LastName" => ff_getSubmit('apellido_paterno'),
+        "SecondLastName" => ff_getSubmit('apellido_materno'),
+        "EmailAddress" => ff_getSubmit('email'),
+        "HomePhoneNumber" => (int)ff_getSubmit('telefono'),
+        "AcademicTitle" => ff_getSubmit('titulo_academico'),
+        "PrimaryAddress" => array(
+            "City" => ff_getSubmit('ciudad'),
+            "Country" => ff_getSubmit('pais'),
+            "State" => ff_getSubmit('estado')
+        )
+        "Comments" => " Especialidad: ".ff_getSubmit('especialidad')." Cédula: ".ff_getSubmit('cedula')
+    )
+);
+
+$url = "https://oraclewebservice.herokuapp.com/web/index.php/client/services/contactservice/environments/dev/operations/createContact/";
+
