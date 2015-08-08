@@ -27,7 +27,7 @@ $app->get('/client/services/{service}/operations/{operation}/', function (Reques
 
     $urls = array(
         'salespartyservice' => "https://caxj.crm.us2.oraclecloud.com/crmCommonSalesParties/SalesPartyService?WSDL",
-        'contactservice' => 'https://cbfa.crm.us2.oraclecloud.com/crmCommonSalesParties/ContactService?WSDL',
+        'contactservice' => 'https://cbfb-test.crm.us2.oraclecloud.com/crmCommonSalesParties/ContactService?WSDL',
         'globalweather' => "http://www.webservicex.com/globalweather.asmx?WSDL",
     );
 
